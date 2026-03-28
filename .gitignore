@@ -2,6 +2,7 @@
 .env
 .env.local
 .idea/
+__pycache__/
 deploy/generated/*
 !deploy/generated/.gitkeep
 deploy/data/
