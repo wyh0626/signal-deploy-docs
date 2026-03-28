@@ -176,7 +176,7 @@ More detail lives in [CONTRIBUTING.md](./CONTRIBUTING.md) and [docs/en/maintenan
 
 ## License / Notice
 
-This repo contains deployment scripts and derivative patches for Signal open-source projects. Keep AGPL-compatible licensing and clearly reference upstream projects in `NOTICE`:
+This repo contains deployment scripts and derivative patches for Signal open-source projects. As a public repository, keep the project under `AGPL-3.0-only` and clearly reference these upstream projects in `NOTICE`:
 
 - [Signal-Server](https://github.com/signalapp/Signal-Server)
 - [Signal-Desktop](https://github.com/signalapp/Signal-Desktop)
