@@ -1,0 +1,129 @@
+diff --git a/service/src/main/java/org/whispersystems/textsecuregcm/registration/RegistrationServiceClient.java b/service/src/main/java/org/whispersystems/textsecuregcm/registration/RegistrationServiceClient.java
+index 09c64b59a..41b1c74e0 100644
+--- a/service/src/main/java/org/whispersystems/textsecuregcm/registration/RegistrationServiceClient.java
++++ b/service/src/main/java/org/whispersystems/textsecuregcm/registration/RegistrationServiceClient.java
+@@ -9,6 +9,7 @@ import io.grpc.CallCredentials;
+ import io.grpc.ChannelCredentials;
+ import io.grpc.Deadline;
+ import io.grpc.Grpc;
++import io.grpc.InsecureChannelCredentials;
+ import io.grpc.ManagedChannel;
+ import io.grpc.TlsChannelCredentials;
+ import java.io.ByteArrayInputStream;
+@@ -64,6 +65,31 @@ public class RegistrationServiceClient implements Managed {
+     }
+   }
+ 
++  /**
++   * Insecure (plaintext) constructor for local/dev deployments. This avoids
++   * identity-token call credentials and TLS setup when talking to the local
++   * registration-service container.
++   */
++  public RegistrationServiceClient(final String host,
++      final int port,
++      final byte[] collationKeySalt,
++      final Executor callbackExecutor) {
++
++    this.channel = Grpc.newChannelBuilderForAddress(host, port, InsecureChannelCredentials.create())
++        .idleTimeout(1, TimeUnit.MINUTES)
++        .build();
++
++    this.stub = RegistrationServiceGrpc.newFutureStub(channel);
++    this.collationKeySalt = collationKeySalt;
++    this.callbackExecutor = callbackExecutor;
++
++    try {
++      getInitializedMac(collationKeySalt);
++    } catch (final InvalidKeyException e) {
++      throw new IllegalArgumentException(e);
++    }
++  }
++
+   public RegistrationServiceClient(final String host,
+       final int port,
+       final CallCredentials callCredentials,
+diff --git a/service/src/main/java/org/whispersystems/textsecuregcm/configuration/LocalRegistrationServiceConfiguration.java b/service/src/main/java/org/whispersystems/textsecuregcm/configuration/LocalRegistrationServiceConfiguration.java
+new file mode 100644
+index 000000000..d91928f6f
+--- /dev/null
++++ b/service/src/main/java/org/whispersystems/textsecuregcm/configuration/LocalRegistrationServiceConfiguration.java
+@@ -0,0 +1,34 @@
++/*
++ * Copyright 2024 Signal Messenger, LLC
++ * SPDX-License-Identifier: AGPL-3.0-only
++ */
++
++package org.whispersystems.textsecuregcm.configuration;
++
++import com.fasterxml.jackson.annotation.JsonTypeName;
++import io.dropwizard.core.setup.Environment;
++import jakarta.validation.constraints.NotBlank;
++import jakarta.validation.constraints.NotNull;
++import java.util.concurrent.Executor;
++import java.util.concurrent.ScheduledExecutorService;
++import org.whispersystems.textsecuregcm.configuration.secrets.SecretBytes;
++import org.whispersystems.textsecuregcm.registration.RegistrationServiceClient;
++
++/**
++ * Local/dev registration service configuration that uses insecure (plaintext)
++ * gRPC with no identity-token call credentials.
++ */
++@JsonTypeName("local")
++public record LocalRegistrationServiceConfiguration(
++    @NotBlank String host,
++    int port,
++    @NotNull SecretBytes collationKeySalt) implements RegistrationServiceClientFactory {
++
++  @Override
++  public RegistrationServiceClient build(final Environment environment,
++      final Executor callbackExecutor,
++      final ScheduledExecutorService identityRefreshExecutor) {
++
++    return new RegistrationServiceClient(host, port, collationKeySalt.value(), callbackExecutor);
++  }
++}
+diff --git a/service/src/main/java/org/whispersystems/textsecuregcm/configuration/NoOpPubSubPublisherFactory.java b/service/src/main/java/org/whispersystems/textsecuregcm/configuration/NoOpPubSubPublisherFactory.java
+new file mode 100644
+index 000000000..93a6f6cf7
+--- /dev/null
++++ b/service/src/main/java/org/whispersystems/textsecuregcm/configuration/NoOpPubSubPublisherFactory.java
+@@ -0,0 +1,23 @@
++/*
++ * Copyright 2024 Signal Messenger, LLC
++ * SPDX-License-Identifier: AGPL-3.0-only
++ */
++
++package org.whispersystems.textsecuregcm.configuration;
++
++import com.fasterxml.jackson.annotation.JsonTypeName;
++import com.google.api.core.ApiFutures;
++import com.google.cloud.pubsub.v1.PublisherInterface;
++import java.io.IOException;
++
++/**
++ * No-op Pub/Sub publisher for local/dev deployments.
++ */
++@JsonTypeName("noop")
++public class NoOpPubSubPublisherFactory implements PubSubPublisherFactory {
++
++  @Override
++  public PublisherInterface build() throws IOException {
++    return message -> ApiFutures.immediateFuture("noop-message-id");
++  }
++}
+diff --git a/service/src/main/resources/META-INF/services/org.whispersystems.textsecuregcm.configuration.PubSubPublisherFactory b/service/src/main/resources/META-INF/services/org.whispersystems.textsecuregcm.configuration.PubSubPublisherFactory
+new file mode 100644
+index 000000000..71923e4ad
+--- /dev/null
++++ b/service/src/main/resources/META-INF/services/org.whispersystems.textsecuregcm.configuration.PubSubPublisherFactory
+@@ -0,0 +1,2 @@
++org.whispersystems.textsecuregcm.configuration.DefaultPubSubPublisherFactory
++org.whispersystems.textsecuregcm.configuration.NoOpPubSubPublisherFactory
+diff --git a/service/src/main/resources/META-INF/services/org.whispersystems.textsecuregcm.configuration.RegistrationServiceClientFactory b/service/src/main/resources/META-INF/services/org.whispersystems.textsecuregcm.configuration.RegistrationServiceClientFactory
+new file mode 100644
+index 000000000..b31e431bd
+--- /dev/null
++++ b/service/src/main/resources/META-INF/services/org.whispersystems.textsecuregcm.configuration.RegistrationServiceClientFactory
+@@ -0,0 +1,2 @@
++org.whispersystems.textsecuregcm.configuration.RegistrationServiceConfiguration
++org.whispersystems.textsecuregcm.configuration.LocalRegistrationServiceConfiguration

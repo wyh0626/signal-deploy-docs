@@ -1,0 +1,159 @@
+diff --git a/ts/util/desktopCapturer.preload.ts b/ts/util/desktopCapturer.preload.ts
+index 00ac26395..f6db2da09 100644
+--- a/ts/util/desktopCapturer.preload.ts
++++ b/ts/util/desktopCapturer.preload.ts
+@@ -23,6 +23,23 @@ import { isOlderThan } from './timestamp.std.js';
+ 
+ const log = createLogger('desktopCapturer');
+ 
++function getMacScreenShareModule():
++  | typeof import('@indutny/mac-screen-share')
++  | undefined {
++  try {
++    // process.dlopen() for the addon takes roughly 34ms so avoid running it
++    // until requested by user.
++    // eslint-disable-next-line global-require, @typescript-eslint/no-var-requires
++    return require('@indutny/mac-screen-share');
++  } catch (error) {
++    log.warn(
++      'desktopCapturer: native mac screen share module unavailable, falling back to Electron desktop capture',
++      Errors.toLogFormat(error)
++    );
++    return undefined;
++  }
++}
++
+ // Chrome-only API for now, thus a declaration:
+ declare class MediaStreamTrackGenerator extends MediaStreamTrack {
+   constructor(options: { kind: 'video' });
+@@ -265,10 +282,11 @@ export class DesktopCapturer {
+       lastFrame = undefined;
+     };
+ 
+-    // process.dlopen() for the addon takes roughly 34ms so avoid running it
+-    // until requested by user.
+-    // eslint-disable-next-line global-require, @typescript-eslint/no-var-requires
+-    const macScreenShare = require('@indutny/mac-screen-share');
++    const macScreenShare = getMacScreenShareModule();
++    if (!macScreenShare) {
++      throw new Error('Native macOS screen share module is unavailable');
++    }
++
+     const stream: Stream = new macScreenShare.Stream({
+       width: REQUESTED_SCREEN_SHARE_WIDTH,
+       height: REQUESTED_SCREEN_SHARE_HEIGHT,
+@@ -378,8 +396,5 @@ function isScreenSource(source: DesktopCapturerSource): boolean {
+ }
+ 
+ export function isNativeMacScreenShareSupported(): boolean {
+-  // process.dlopen() for the addon takes roughly 34ms so avoid running it
+-  // until requested by user.
+-  // eslint-disable-next-line global-require, @typescript-eslint/no-var-requires
+-  return require('@indutny/mac-screen-share').isSupported;
++  return Boolean(getMacScreenShareModule()?.isSupported);
+ }
+diff --git a/ts/windows/main/attachments.preload.ts b/ts/windows/main/attachments.preload.ts
+index d866500b4..2f6c2f168 100644
+--- a/ts/windows/main/attachments.preload.ts
++++ b/ts/windows/main/attachments.preload.ts
+@@ -34,10 +34,10 @@ try {
+   // eslint-disable-next-line global-require, import/no-extraneous-dependencies
+   xattr = require('fs-xattr');
+ } catch (e) {
+-  if (process.platform === 'darwin') {
+-    throw e;
+-  }
+-  log.info('x-attr dependency did not load successfully');
++  log.warn(
++    'x-attr dependency did not load successfully; attachment quarantine metadata will be skipped',
++    e
++  );
+ }
+ 
+ export const createPlaintextReader = (
+diff --git a/scripts/start-local-dev.sh b/scripts/start-local-dev.sh
+new file mode 100755
+index 000000000..59f9fa6f5
+--- /dev/null
++++ b/scripts/start-local-dev.sh
+@@ -0,0 +1,78 @@
++#!/usr/bin/env bash
++
++set -euo pipefail
++
++ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
++REPO_ROOT="$(cd "${ROOT_DIR}/../.." && pwd)"
++DEPLOY_DIR="${REPO_ROOT}/deploy"
++ENV_FILE="${REPO_ROOT}/.env"
++CERT_PATH="${DEPLOY_DIR}/generated/localhost-cert.pem"
++SERVER_CONFIG_PATH="${DEPLOY_DIR}/generated/signal-server.yml"
++
++SIGNAL_HTTPS_PORT=9443
++if [[ -f "${ENV_FILE}" ]]; then
++  # shellcheck disable=SC1090
++  source "${ENV_FILE}"
++fi
++
++LOCAL_URL="${LOCAL_SIGNAL_DESKTOP_URL:-https://localhost:${SIGNAL_HTTPS_PORT:-9443}}"
++
++if [[ -s "${HOME}/.nvm/nvm.sh" ]]; then
++  # shellcheck disable=SC1090
++  source "${HOME}/.nvm/nvm.sh"
++  nvm use >/dev/null
++fi
++
++if [[ ! -f "${CERT_PATH}" ]]; then
++  echo "Missing ${CERT_PATH}" >&2
++  echo "Run: ${REPO_ROOT}/scripts/generate-localhost-cert.sh" >&2
++  exit 1
++fi
++
++if [[ ! -f "${SERVER_CONFIG_PATH}" ]]; then
++  echo "Missing ${SERVER_CONFIG_PATH}" >&2
++  echo "Run: ${REPO_ROOT}/scripts/render-signal-config.sh" >&2
++  exit 1
++fi
++
++NODE_CONFIG="$(
++  node - "${CERT_PATH}" "${SERVER_CONFIG_PATH}" "${LOCAL_URL}" <<'EOF'
++const fs = require('node:fs');
++
++const [, , certPath, serverConfigPath, localUrl] = process.argv;
++const certPem = fs.readFileSync(certPath, 'utf8');
++const serverConfig = fs.readFileSync(serverConfigPath, 'utf8');
++const serverPublicMatch = serverConfig.match(/^\s*serverPublic:\s*(\S+)\s*$/m);
++
++if (!serverPublicMatch) {
++  console.error(`Could not find zkConfig.serverPublic in ${serverConfigPath}`);
++  process.exit(1);
++}
++
++const overrides = {
++  serverUrl: localUrl,
++  storageUrl: localUrl,
++  directoryUrl: localUrl,
++  sfuUrl: `${localUrl}/`,
++  cdn: {
++    '0': localUrl,
++    '2': localUrl,
++    '3': localUrl,
++  },
++  challengeUrl: localUrl,
++  registrationChallengeUrl: localUrl,
++  certificateAuthority: certPem,
++  serverPublicParams: serverPublicMatch[1],
++  hardcodedCaptchaForLocalTestingOnly: 'noop.noop.registration.localtest',
++  openDevTools: true,
++};
++
++process.stdout.write(JSON.stringify(overrides));
++EOF
++)"
++
++export NODE_ENV=development
++export SIGNAL_ENABLE_HTTP=1
++export NODE_CONFIG
++
++echo "Starting Signal Desktop against ${LOCAL_URL}"
++cd "${ROOT_DIR}"
++exec pnpm start

@@ -1,0 +1,14 @@
+.git
+.github
+.idea
+.DS_Store
+README.md
+docs
+patches
+scripts
+versions
+deploy/generated
+deploy/data
+upstream/Signal-Desktop
+**/.git
+**/node_modules

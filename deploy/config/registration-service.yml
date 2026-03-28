@@ -1,0 +1,38 @@
+# Registration Service local config
+#
+# Micronaut merges:
+# - application.yml
+# - application-dev.yml
+# - this file
+#
+# In dev mode:
+# - verification code = last 6 digits of the phone number
+# - no Twilio / MessageBird is required
+
+redis:
+  uri: redis://redis-cache:6379
+
+rate-limits:
+  send-sms-verification-code:
+    delays:
+      - 0s
+  send-voice-verification-code:
+    delay-after-first-sms: 0s
+    delays:
+      - 0s
+  check-verification-code:
+    delays:
+      - 0s
+  leaky-bucket:
+    send-sms-verification-code-per-number:
+      max-capacity: 1000
+      permit-regeneration-period: 1s
+      min-delay: 0s
+    send-voice-verification-code-per-number:
+      max-capacity: 1000
+      permit-regeneration-period: 1s
+      min-delay: 0s
+    check-verification-code-per-number:
+      max-capacity: 1000
+      permit-regeneration-period: 1s
+      min-delay: 0s

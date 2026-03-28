@@ -1,0 +1,5 @@
+captcha:
+  scoreFloor: 0.5
+  allowHCaptcha: false
+  hCaptchaSiteKeys: {}
+  scoreFloorByAction: {}

@@ -1,0 +1,456 @@
+# Generated at runtime by scripts/render-signal-config.sh
+# Do not edit deploy/generated/signal-server.yml by hand.
+
+logging:
+  level: INFO
+  appenders:
+    - type: console
+      threshold: ALL
+      timeZone: UTC
+      target: stdout
+
+server:
+  applicationConnectors:
+    - type: http
+      port: 8080
+    - type: https
+      port: 8443
+      keyStorePath: /config/generated/localhost-keystore.p12
+      keyStorePassword: changeit
+      keyStoreType: PKCS12
+  adminConnectors:
+    - type: http
+      port: 8081
+
+tlsKeyStore:
+  password: secret://tlsKeyStore.password
+
+awsCredentialsProvider:
+  type: static
+  accessKeyId: secret://awsCredentials.accessKeyId
+  secretAccessKey: secret://awsCredentials.secretAccessKey
+
+dynamoDbClient:
+  region: us-east-1
+
+dynamoDbTables:
+  accounts:
+    tableName: Example_Accounts
+    phoneNumberTableName: Example_Accounts_PhoneNumbers
+    phoneNumberIdentifierTableName: Example_Accounts_PhoneNumberIdentifiers
+    usernamesTableName: Example_Accounts_Usernames
+    usedLinkDeviceTokensTableName: Example_Accounts_UsedLinkDeviceTokens
+  appleDeviceChecks:
+    tableName: Example_AppleDeviceChecks
+  appleDeviceCheckPublicKeys:
+    tableName: Example_AppleDeviceCheckPublicKeys
+  backups:
+    tableName: Example_Backups
+  clientReleases:
+    tableName: Example_ClientReleases
+  deletedAccounts:
+    tableName: Example_DeletedAccounts
+  deletedAccountsLock:
+    tableName: Example_DeletedAccountsLock
+  issuedReceipts:
+    tableName: Example_IssuedReceipts
+    expiration: P30D
+    generator: AAAAAAAAAAAAAAAA
+    maxIssuedReceiptsPerPaymentId:
+      STRIPE: 1
+      BRAINTREE: 1
+      GOOGLE_PLAY_BILLING: 1
+      APPLE_APP_STORE: 1
+  ecKeys:
+    tableName: Example_Keys
+  ecSignedPreKeys:
+    tableName: Example_EC_Signed_Pre_Keys
+  pagedPqKeys:
+    tableName: Example_PQ_Paged_Keys
+  pqLastResortKeys:
+    tableName: Example_PQ_Last_Resort_Keys
+  messages:
+    tableName: Example_Messages
+    expiration: P30D
+  onetimeDonations:
+    tableName: Example_OnetimeDonations
+    expiration: P90D
+  phoneNumberIdentifiers:
+    tableName: Example_PhoneNumberIdentifiers
+  profiles:
+    tableName: Example_Profiles
+  pushChallenge:
+    tableName: Example_PushChallenge
+  pushNotificationExperimentSamples:
+    tableName: Example_PushNotificationExperimentSamples
+  redeemedReceipts:
+    tableName: Example_RedeemedReceipts
+    expiration: P30D
+  registrationRecovery:
+    tableName: Example_RegistrationRecovery
+    expiration: P300D
+  remoteConfig:
+    tableName: Example_RemoteConfig
+  reportMessage:
+    tableName: Example_ReportMessage
+  scheduledJobs:
+    tableName: Example_ScheduledJobs
+    expiration: P7D
+  subscriptions:
+    tableName: Example_Subscriptions
+  clientPublicKeys:
+    tableName: Example_ClientPublicKeys
+  verificationSessions:
+    tableName: Example_VerificationSessions
+
+pagedSingleUseKEMPreKeyStore:
+  bucket: signal-prekeys
+  region: us-east-1
+  endpointOverride: http://minio:9000
+
+cdn:
+  bucket: signal-cdn
+  credentials:
+    accessKeyId: secret://cdn.accessKey
+    secretAccessKey: secret://cdn.accessSecret
+  region: us-east-1
+  endpointOverride: http://minio:9000
+
+dynamicConfig:
+  s3Region: us-east-1
+  s3Bucket: signal-dynamic-config
+  objectKey: dynamic-config.yaml
+  maxSize: 100000
+  refreshInterval: PT60S
+  endpointOverride: http://minio:9000
+
+asnTable:
+  s3Region: us-east-1
+  s3Bucket: signal-asn
+  objectKey: asn.tsv
+  maxSize: 10000000
+  refreshInterval: PT1H
+  endpointOverride: http://minio:9000
+
+cacheCluster:
+  configurationUri: redis://redis-cache:6379/
+
+pubsub:
+  uri: redis://redis-pubsub:6379/
+
+pushSchedulerCluster:
+  configurationUri: redis://redis-pushscheduler:6379/
+
+rateLimitersCluster:
+  configurationUri: redis://redis-ratelimiters:6379/
+
+messageCache:
+  persistDelayMinutes: 1
+  cluster:
+    configurationUri: redis://redis-messagecache:6379/
+
+registrationService:
+  type: local
+  host: registration-service
+  port: 50051
+  collationKeySalt: secret://registrationService.collationKeySalt
+
+directoryV2:
+  client:
+    userAuthenticationTokenSharedSecret: secret://directoryV2.client.userAuthenticationTokenSharedSecret
+    userIdTokenSharedSecret: secret://directoryV2.client.userIdTokenSharedSecret
+
+svr2:
+  uri: localhost
+  userAuthenticationTokenSharedSecret: secret://svr2.userAuthenticationTokenSharedSecret
+  userIdTokenSharedSecret: secret://svr2.userIdTokenSharedSecret
+  svrCaCertificates:
+    - |
+      -----BEGIN CERTIFICATE-----
+      MIIBgjCCASmgAwIBAgIUcFDWWO+/ut/hLG1w8wEY16U1d0gwCgYIKoZIzj0EAwIw
+      FzEVMBMGA1UEAwwMc2lnbmFsLWxvY2FsMB4XDTI2MDMyNzE2NDkzMVoXDTM2MDMy
+      NDE2NDkzMVowFzEVMBMGA1UEAwwMc2lnbmFsLWxvY2FsMFkwEwYHKoZIzj0CAQYI
+      KoZIzj0DAQcDQgAEMlJVrtSCkdJzmAzYOuARJGSKf57mGivX13OOdQp9ou0VI04A
+      UD96hH3G5faJEjAkDsoMHVb0chUV5ds+Y393lKNTMFEwHQYDVR0OBBYEFKLGqTqI
+      qghc6PcAZCCpBowswWajMB8GA1UdIwQYMBaAFKLGqTqIqghc6PcAZCCpBowswWaj
+      MA8GA1UdEwEB/wQFMAMBAf8wCgYIKoZIzj0EAwIDRwAwRAIgZa2GEekR6v0b99Ln
+      gIQWL41Ew2UN99rMTNTs175ZYR4CIFI+wlJDEt3dklLXQ6mZljF/76bSdhAUmxjY
+      SJd3c5U8
+      -----END CERTIFICATE-----
+
+svrb:
+  uri: localhost
+  userAuthenticationTokenSharedSecret: secret://svrb.userAuthenticationTokenSharedSecret
+  userIdTokenSharedSecret: secret://svrb.userIdTokenSharedSecret
+  svrCaCertificates:
+    - |
+      -----BEGIN CERTIFICATE-----
+      MIIBgjCCASmgAwIBAgIUcFDWWO+/ut/hLG1w8wEY16U1d0gwCgYIKoZIzj0EAwIw
+      FzEVMBMGA1UEAwwMc2lnbmFsLWxvY2FsMB4XDTI2MDMyNzE2NDkzMVoXDTM2MDMy
+      NDE2NDkzMVowFzEVMBMGA1UEAwwMc2lnbmFsLWxvY2FsMFkwEwYHKoZIzj0CAQYI
+      KoZIzj0DAQcDQgAEMlJVrtSCkdJzmAzYOuARJGSKf57mGivX13OOdQp9ou0VI04A
+      UD96hH3G5faJEjAkDsoMHVb0chUV5ds+Y393lKNTMFEwHQYDVR0OBBYEFKLGqTqI
+      qghc6PcAZCCpBowswWajMB8GA1UdIwQYMBaAFKLGqTqIqghc6PcAZCCpBowswWaj
+      MA8GA1UdEwEB/wQFMAMBAf8wCgYIKoZIzj0EAwIDRwAwRAIgZa2GEekR6v0b99Ln
+      gIQWL41Ew2UN99rMTNTs175ZYR4CIFI+wlJDEt3dklLXQ6mZljF/76bSdhAUmxjY
+      SJd3c5U8
+      -----END CERTIFICATE-----
+
+storageService:
+  uri: localhost
+  userAuthenticationTokenSharedSecret: secret://storageService.userAuthenticationTokenSharedSecret
+  storageCaCertificates:
+    - |
+      -----BEGIN CERTIFICATE-----
+      MIIBgjCCASmgAwIBAgIUcFDWWO+/ut/hLG1w8wEY16U1d0gwCgYIKoZIzj0EAwIw
+      FzEVMBMGA1UEAwwMc2lnbmFsLWxvY2FsMB4XDTI2MDMyNzE2NDkzMVoXDTM2MDMy
+      NDE2NDkzMVowFzEVMBMGA1UEAwwMc2lnbmFsLWxvY2FsMFkwEwYHKoZIzj0CAQYI
+      KoZIzj0DAQcDQgAEMlJVrtSCkdJzmAzYOuARJGSKf57mGivX13OOdQp9ou0VI04A
+      UD96hH3G5faJEjAkDsoMHVb0chUV5ds+Y393lKNTMFEwHQYDVR0OBBYEFKLGqTqI
+      qghc6PcAZCCpBowswWajMB8GA1UdIwQYMBaAFKLGqTqIqghc6PcAZCCpBowswWaj
+      MA8GA1UdEwEB/wQFMAMBAf8wCgYIKoZIzj0EAwIDRwAwRAIgZa2GEekR6v0b99Ln
+      gIQWL41Ew2UN99rMTNTs175ZYR4CIFI+wlJDEt3dklLXQ6mZljF/76bSdhAUmxjY
+      SJd3c5U8
+      -----END CERTIFICATE-----
+
+keyTransparencyService:
+  host: localhost
+  port: 443
+  tlsCertificate: |
+    -----BEGIN CERTIFICATE-----
+    MIIBgjCCASmgAwIBAgIUcFDWWO+/ut/hLG1w8wEY16U1d0gwCgYIKoZIzj0EAwIw
+    FzEVMBMGA1UEAwwMc2lnbmFsLWxvY2FsMB4XDTI2MDMyNzE2NDkzMVoXDTM2MDMy
+    NDE2NDkzMVowFzEVMBMGA1UEAwwMc2lnbmFsLWxvY2FsMFkwEwYHKoZIzj0CAQYI
+    KoZIzj0DAQcDQgAEMlJVrtSCkdJzmAzYOuARJGSKf57mGivX13OOdQp9ou0VI04A
+    UD96hH3G5faJEjAkDsoMHVb0chUV5ds+Y393lKNTMFEwHQYDVR0OBBYEFKLGqTqI
+    qghc6PcAZCCpBowswWajMB8GA1UdIwQYMBaAFKLGqTqIqghc6PcAZCCpBowswWaj
+    MA8GA1UdEwEB/wQFMAMBAf8wCgYIKoZIzj0EAwIDRwAwRAIgZa2GEekR6v0b99Ln
+    gIQWL41Ew2UN99rMTNTs175ZYR4CIFI+wlJDEt3dklLXQ6mZljF/76bSdhAUmxjY
+    SJd3c5U8
+    -----END CERTIFICATE-----
+  clientCertificate: |
+    -----BEGIN CERTIFICATE-----
+    MIIBgjCCASmgAwIBAgIUcFDWWO+/ut/hLG1w8wEY16U1d0gwCgYIKoZIzj0EAwIw
+    FzEVMBMGA1UEAwwMc2lnbmFsLWxvY2FsMB4XDTI2MDMyNzE2NDkzMVoXDTM2MDMy
+    NDE2NDkzMVowFzEVMBMGA1UEAwwMc2lnbmFsLWxvY2FsMFkwEwYHKoZIzj0CAQYI
+    KoZIzj0DAQcDQgAEMlJVrtSCkdJzmAzYOuARJGSKf57mGivX13OOdQp9ou0VI04A
+    UD96hH3G5faJEjAkDsoMHVb0chUV5ds+Y393lKNTMFEwHQYDVR0OBBYEFKLGqTqI
+    qghc6PcAZCCpBowswWajMB8GA1UdIwQYMBaAFKLGqTqIqghc6PcAZCCpBowswWaj
+    MA8GA1UdEwEB/wQFMAMBAf8wCgYIKoZIzj0EAwIDRwAwRAIgZa2GEekR6v0b99Ln
+    gIQWL41Ew2UN99rMTNTs175ZYR4CIFI+wlJDEt3dklLXQ6mZljF/76bSdhAUmxjY
+    SJd3c5U8
+    -----END CERTIFICATE-----
+  clientPrivateKey: secret://keyTransparencyService.clientPrivateKey
+
+gcpAttachments:
+  domain: localhost:9000
+  email: local@local.dev
+  maxSizeInBytes: 104857600
+  pathPrefix:
+  rsaSigningKey: secret://gcpAttachments.rsaSigningKey
+
+tus:
+  uploadUri: http://minio:9000/signal-attachments
+  userAuthenticationTokenSharedSecret: secret://tus.userAuthenticationTokenSharedSecret
+  maxSizeInBytes: 104857600
+
+apn:
+  sandbox: true
+  bundleId: org.signal.local
+  keyId: secret://apn.keyId
+  teamId: secret://apn.teamId
+  signingKey: secret://apn.signingKey
+
+fcm:
+  credentials: secret://fcm.credentials
+
+unidentifiedDelivery:
+  certificate: CikI14bfmgcSIQWEfA0sN1I082XmYJVRh6NzWg92E9FgnTpqTYxTrqpaIhJA4LnrrN/Dqign95JLaXeE0cJeRMoF3UM+GjjcY4LrJzDUGcqaJQsb6dWpRj5h79Z4F3epG4PJe4RNAUIG4oKXhQ==
+  privateKey: secret://unidentifiedDelivery.privateKey
+  expiresDays: 7
+  embedSigner: true
+
+zkConfig:
+  serverPublic: __ZK_SERVER_PUBLIC__
+  serverSecret: secret://zkConfig-libsignal-0.42.serverSecret
+
+callingZkConfig:
+  serverSecret: secret://callingZkConfig.serverSecret
+
+backupsZkConfig:
+  serverSecret: secret://backupsZkConfig.serverSecret
+
+turn:
+  cloudflare:
+    apiToken: secret://turn.cloudflare.apiToken
+    endpoint: https://rtc.live.cloudflare.com/v1/turn/keys/LOCAL/credentials/generate
+    urls:
+      - turn:localhost:3478
+    urlsWithIps:
+      - turn:%s
+    requestedCredentialTtl: PT24H
+    clientCredentialTtl: PT12H
+    hostname: localhost
+    numHttpClients: 1
+
+stripe:
+  apiKey: secret://stripe.apiKey
+  idempotencyKeyGenerator: secret://stripe.idempotencyKeyGenerator
+  boostDescription: Local Test
+  supportedCurrenciesByPaymentMethod:
+    CARD:
+      - usd
+
+braintree:
+  merchantId: local
+  publicKey: secret://braintree.publicKey
+  privateKey: secret://braintree.privateKey
+  environment: sandbox
+  graphqlUrl: https://payments.sandbox.braintree-api.com/graphql
+  merchantAccounts:
+    'xts': local_merchant
+  supportedCurrenciesByPaymentMethod:
+    PAYPAL:
+      - usd
+  pubSubPublisher:
+    type: noop
+
+googlePlayBilling:
+  credentialsJson: |
+    {"type": "service_account", "project_id": "signal-local", "private_key_id": "local-key-1", "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCkAtB9NJmuBgmk\n4uIQiyACjBkbdUq5+NSFU5fwBYCL4gpKBv9fEzzq2orqzwbVupog4WrUk5FJ4MKl\niKtaSz6/dDS9voFqhTUid3lwgzxTg3E+oqLSmCXfYMZIQvpNgfQK5tMVZr7nRIGf\nVtCo5g0OXQxEqCa0Q6bQD1lZ2vbSbJOWpBG6FeRZTP2HrMG6eUow8x7DpBMk/vOV\nQDrozpL7o1fsOO3OgX7U7JPRaVCg+g8b3GHnEMabiChfyeVY0ixYlSXR/AF7W0s9\n+4wBnjd4437EW4cYaK15BMt/o0gMyOSURLd6jwrrh6/kdMY90Ncsvnk1vwNP0mWG\nDT1fX6SVAgMBAAECggEACwDo718eKMrdG2CUOl6DKF7+EW88mYTxIskzELAZA2/u\nZDB0/wvbRexuO1OzCZej3vnddEnUPdvw/MpSQlQTCSUPcGPkHeGDAsveOQC50hnB\nX5DpkjreXs68CHDjhyiyI7sZxVe0p7wOY3Wfhf1gbREsET0kBgSvhknJVloQJJmq\niDp5KoOp9fGHZATUNZSnbPev948LyHYynwW5D/IkmrusLy7I8pnf0cehJkrIzCB7\nfebl6KT2ziE3Aqui35hz7gKfHAmyOy6isBQbgEJluvugLp43xULnp6pzt/JpJ+ck\n7yUY1I4GiPP1AfVIX0LjNRoD+byASVow3ifo+8KFrwKBgQDULpz0jpN4HCuEpgxP\nFmL0k0F5o3F9Wl+HdIeKUOHHk5bG1Q4S+bMo/RdQBMTFE8GcSufB5rOjmhUsPGdo\nXydN9TSffGieC0+zYGHglYBBLgkYDbsmXSdvkZgDLsxGYRF5WYo2KTu9TNDgQP/O\ntE0TPxOrpfU9mOln9vg9/NL90wKBgQDF4YzYp29eMG7WMrllCKJoFUD236+ZSM9q\nnOQGpgyuJp6eJA3MwnbrGZrEQtDQA+W0+css8GCdlqBledBVrEmrhuDbvmTbyRlb\n3b2DRhd//BeCFNY8EdtfypkwoLzD7LXrngIgYqG92gC9KdvrrjEOSRBnNW76cZ1X\nIcyN8IOK9wKBgQDMx+wdr5kuO+nYTTXmApIgwBpaHl+C/vzhy5qg6KzvpEbJwYii\n0bGTJqkgRmnuVsHuaPDCWDkZ9bTni6i1t9hEShqurjB+ECas1aHBUiiFP7vxJhdw\n0EkmSZsvvzPR3Q8zUjKtUSBh88hIFxOMWMFmiOMgL7y/5VunRlmR4fd0lwKBgCAP\nTPyFFBwUiMCXc0YVQgrO9rmIwDB7hW9mf+M73+4PP7+rY7j7AL1SZqrJkH9DQmIx\n3mMnht/BWbdXJxPaWA08Sw4PKNQbHsqtgFjWcFRCCaT/rz4IPpykfHFOeYbcwRSt\ngvawRDg4K8p6D7F9hWElIU03cQWOhslpJnUQtJ89AoGBAKCzsKSI56Dlepp35u98\nyxuSAuxfItQErNQWWaGNCnav8xX6pZ9OOyYz7SUNdtKiYVvCtm2DXgQhT6Gbkj/B\nBBbmtDiMUlgF6syoQnVZ7yntutTbP3n4NK2oAIC4zvXhiNbEklCS3kKd03QhB2cF\ng3Z0NUdopa9B4RirmEl8NZ+G\n-----END PRIVATE KEY-----\n", "client_email": "firebase-adminsdk@signal-local.iam.gserviceaccount.com", "client_id": "000000000000000000001", "auth_uri": "https://accounts.google.com/o/oauth2/auth", "token_uri": "https://oauth2.googleapis.com/token"}
+  packageName: org.thoughtcrime.securesms
+  applicationName: signal-local
+  productIdToLevel: {}
+
+appleAppStore:
+  env: SANDBOX
+  bundleId: org.signal.local
+  appAppleId: 12345
+  issuerId: local
+  keyId: local
+  encodedKey: secret://appleAppStore.encodedKey
+  subscriptionGroupId: local
+  productIdToLevel: {}
+  appleRootCerts:
+    - MIIDFzCCAf+gAwIBAgIUaO0gcVop1Rthv5gVS2NQhssgT0AwDQYJKoZIhvcNAQELBQAwGzEZMBcGA1UEAwwQbG9jYWwtYXBwbGUtcm9vdDAeFw0yNjAzMjcxNzM3MDdaFw0zNjAzMjQxNzM3MDdaMBsxGTAXBgNVBAMMEGxvY2FsLWFwcGxlLXJvb3QwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDgOSYUEV+Xo5S3R/af+fufb2BqIGzJ4KkSryCBCwsdbRJGH0Nqeunog/EI1fJMXqfNAiKBNBHT+6QfzmbV1iriNKOtaO+3P4JkRh/bFP91i5DKtkLZDXZ7edQ+uV/EIoi1CCMC/J/VFl3geZ+IX2Gx0GWbAJWSGumbiyaLcqwQFmgaHVwRjBiCAcf7v0q1Siznw85DlVtLTIeATkrl7o6liWGn3XeASaOzlUIV5IpoC02HWGA6u4G7MAAJnOHtb5NsFS+CysrxyUuODdYUqETL2sDBm8pyDEGW7tGY+L9INnrHgXMYhtChFQ2yy5+gY9gmpF5jGpEv6RWXsEPWcCItAgMBAAGjUzBRMB0GA1UdDgQWBBQmBONIrNsHV3T/5LNy7iH8LQTsrjAfBgNVHSMEGDAWgBQmBONIrNsHV3T/5LNy7iH8LQTsrjAPBgNVHRMBAf8EBTADAQH/MA0GCSqGSIb3DQEBCwUAA4IBAQBOLrZaiYfH8BdSKMfbh0B9GevfyWfbH0j9Cl4GO+dko9El1FcVMGVV3Yd5gUAePfXIGG80tXs3oLL0QAh0UQrjsium5hLF1PrC1qhoMpinLGemrp/TTHVM3Ooi9uNr/HCsYOPTDj2+U987Keeqrc9wBsXXnSNFHQHZgWwxXWhn8vQrAM6LWzvMTdEGlORAOx6upKp7++goRBU30CpspUEvHpH8AveY3DtWoLnjXLzAH+GpoUw9SSc2Opwb5x+1f2ZQl3pKBEMAb0WSO1MX3n0QwDx3Le66zNPqRHOyyzOFauclG+3MDdVM18tDIu8mIT2ukCWpcS/T9lZHu4xQlngn
+
+appleDeviceCheck:
+  production: false
+  teamId: LOCAL00000
+  bundleId: org.signal.local
+
+deviceCheck:
+  backupRedemptionDuration: P30D
+  backupRedemptionLevel: 201
+
+paymentsService:
+  userAuthenticationTokenSharedSecret: secret://paymentsService.userAuthenticationTokenSharedSecret
+  paymentCurrencies:
+    - MOB
+  externalClients:
+    fixerApiKey: secret://paymentsService.fixerApiKey
+    coinGeckoApiKey: secret://paymentsService.coinGeckoApiKey
+    coinGeckoCurrencyIds:
+      MOB: mobilecoin
+
+badges:
+  badges:
+    - id: TEST
+      category: other
+      sprites:
+        - sprite-1.png
+        - sprite-2.png
+        - sprite-3.png
+        - sprite-4.png
+        - sprite-5.png
+        - sprite-6.png
+      svg: example.svg
+      svgs:
+        - light: example-light.svg
+          dark: example-dark.svg
+  badgeIdsEnabledForAll:
+    - TEST
+  receiptLevels:
+    '1': TEST
+
+subscription:
+  badgeExpiration: P30D
+  badgeGracePeriod: P15D
+  backupExpiration: P30D
+  backupGracePeriod: P15D
+  backupFreeTierMediaDuration: P30D
+  levels:
+    500:
+      badge: TEST
+      prices:
+        usd:
+          amount: '5'
+          processorIds:
+            STRIPE: price_local
+
+oneTimeDonations:
+  sepaMaximumEuros: '10000'
+  boost:
+    level: 1
+    expiration: P90D
+    badge: TEST
+  gift:
+    level: 10
+    expiration: P90D
+    badge: TEST
+  currencies:
+    usd:
+      minimum: '1'
+      gift: '10'
+      boosts:
+        - '5'
+        - '10'
+        - '20'
+        - '50'
+        - '100'
+        - '200'
+
+remoteConfig:
+  globalConfig: {}
+
+shortCode:
+  baseUrl: __PUBLIC_HTTPS_BASE_URL__/shortcodes/
+
+linkDevice:
+  secret: secret://linkDevice.secret
+
+externalRequestFilter:
+  grpcMethods: []
+  paths: []
+  permittedInternalRanges:
+    - 127.0.0.0/8
+    - 10.0.0.0/8
+    - 172.16.0.0/12
+    - 192.168.0.0/16
+
+idlePrimaryDeviceReminder:
+  minIdleDuration: P30D
+
+grpc:
+  port: 50051
+
+openTelemetry:
+  enabled: false
+  environment: local
+  url: http://localhost:4318/
+
+cdn3StorageManager:
+  baseUri: http://minio:9000
+  clientId: minioadmin
+  clientSecret: secret://cdn3StorageManager.clientSecret
+  sourceSchemes:
+    2: s3
+    3: s3
+
+callQualitySurvey:
+  pubSubPublisher:
+    type: noop
+
+hlrLookup:
+  apiKey: secret://hlrLookup.apiKey
+  apiSecret: secret://hlrLookup.apiSecret
