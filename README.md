@@ -188,7 +188,7 @@ cp .env.example .env
 
 ## License / Notice
 
-这个仓库包含对 Signal 开源项目的派生补丁和部署脚本。发布到 GitHub 前，建议保留 AGPL-3.0-only 兼容许可，并在 `NOTICE` 中明确引用上游项目：
+这个仓库包含对 Signal 开源项目的派生补丁和部署脚本。作为公开仓库，建议保持 `AGPL-3.0-only` 许可，并在 `NOTICE` 中明确引用以下上游项目：
 
 - [Signal-Server](https://github.com/signalapp/Signal-Server)
 - [Signal-Desktop](https://github.com/signalapp/Signal-Desktop)
