@@ -8,6 +8,8 @@ English: [./en/README.md](./en/README.md)
   仓库内模块与基础设施总览。
 - [dev-replacements.md](./dev-replacements.md)
   本地替代件与可测试范围。
+- [deployment-checklists.md](./deployment-checklists.md)
+  生产准备与省钱测试两套部署清单。
 - [non-local-services.md](./non-local-services.md)
   不能在本地完整跑起来的官方依赖，以及它们在系统里的职责。
 - [sgx.md](./sgx.md)
