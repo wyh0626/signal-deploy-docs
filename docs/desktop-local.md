@@ -1,5 +1,7 @@
 # Signal-Desktop 本地调试
 
+English: [./en/desktop-local.md](./en/desktop-local.md)
+
 ## 两种使用方式
 
 ### 1. Standalone Device
@@ -39,6 +41,7 @@
 
 - 官方商店里安装的 Signal Android / iOS 默认连的是官方环境
 - 它们不能直接扫这套本地 Desktop
+- 如果要把后端和 Desktop 一步拉起，可以直接用 `./scripts/dev-up.sh --include-desktop`
 
 ## 这个仓库对 Desktop 做了什么
 

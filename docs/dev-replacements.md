@@ -1,5 +1,7 @@
 # Dev 部署替代件
 
+English: [./en/dev-replacements.md](./en/dev-replacements.md)
+
 ## 替代原则
 
 这个项目的策略是：
@@ -48,3 +50,5 @@
 - 真正的移动推送
 - 真正的商店支付 / 订阅校验
 - 真实多节点 Redis / FoundationDB 运维行为
+
+每个“本地跑不全”的依赖具体负责什么，见 [non-local-services.md](./non-local-services.md)。
