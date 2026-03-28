@@ -1,14 +1,50 @@
 # Signal 部署文档
 
+English: [README.en.md](./README.en.md)
+
 把 Signal 的本地开发部署方式沉淀成一个可开源、可复现、可版本化的仓库。
 
-这个项目的目标不是“完整复刻官方生产环境”，而是提供一套稳定的本地 dev stack，让你可以：
+这个仓库的目标不是“完整复刻官方生产环境”，而是提供一套稳定的本地 dev stack，让你可以：
 
 - 在 Docker 里启动 `Signal-Server`
 - 用本地 `registration-service` 完成验证码注册
 - 用 MinIO、DynamoDB Local、Redis、GCloud emulators 替代云依赖
 - 让 `Signal-Desktop` 直连本地后端进行 standalone 调试
-- 按 Signal 上游版本维护对应分支和版本清单
+- 按 Signal 上游版本维护对应分支、补丁和文档
+
+## 一句话结论
+
+- `./scripts/dev-up.sh`
+  直接拉起整个后端栈。
+- `./scripts/dev-up.sh --smoke-test`
+  拉起后端栈并跑一遍最小注册验证码链路验证。
+- `./scripts/dev-up.sh --include-desktop`
+  拉起后端后继续准备并启动 `Signal-Desktop`。
+
+## 文档导航
+
+完整文档索引见 [docs/README.md](./docs/README.md)。
+
+推荐阅读顺序：
+
+- [docs/modules.md](./docs/modules.md)
+  看清楚整个仓库到底包含哪些模块。
+- [docs/dev-replacements.md](./docs/dev-replacements.md)
+  看清楚哪些官方依赖被本地替代了。
+- [docs/non-local-services.md](./docs/non-local-services.md)
+  看清楚哪些能力本地就是跑不全，以及这些模块分别负责什么。
+- [docs/patches.md](./docs/patches.md)
+  看清楚补丁为什么存在、改了什么、怎么维护。
+- [docs/sgx.md](./docs/sgx.md)
+  了解 SGX 在 Signal 里的作用、原理和部署前提。
+- [docs/desktop-local.md](./docs/desktop-local.md)
+  了解本地 Desktop 调试和扫码链路边界。
+- [docs/versioning.md](./docs/versioning.md)
+  了解如何让分支与 Signal 版本一一对应。
+- [docs/maintenance.md](./docs/maintenance.md)
+  了解后续如何持续维护这个仓库。
+- [docs/roadmap.md](./docs/roadmap.md)
+  了解桌面端 demo、Android、iOS 和生产化的推进顺序。
 
 ## 仓库包含什么
 
@@ -23,11 +59,11 @@
 - `patches/`
   对上游 `Signal-Server` 和 `Signal-Desktop` 的最小本地开发补丁。
 - `scripts/`
-  一键拉取上游、应用补丁、生成证书/密钥、启动/停止环境、启动桌面端。
+  一键拉取上游、应用补丁、生成证书/密钥、启动/停止环境、跑 smoke test、启动桌面端。
 - `versions/`
   上游版本钉住清单。`current.env` 表示当前默认组合。
 - `docs/`
-  模块说明、替代件说明、版本策略、桌面端调试说明。
+  模块说明、替代件说明、缺失能力、补丁说明、SGX、维护策略和路线图。
 
 ## 当前已验证的版本
 
@@ -39,41 +75,7 @@
 - `registration-service`: `2.58.0`
 - `Signal-Desktop`: `v7.42.0-adhoc.20250124.1-1503-ge8efc3c66`
 
-## 模块概览
-
-核心模块：
-
-- `Signal-Server`
-  主后端服务，HTTP/HTTPS/Admin/gRPC 都由它提供。
-- `registration-service`
-  手机号验证与注册会话服务。本项目使用 `dev,local` 环境，不接真实短信供应商。
-- `Signal-Desktop`
-  可选。用于直连本地后端做 standalone 调试。
-
-基础设施：
-
-- `DynamoDB Local`
-  替代 AWS DynamoDB。
-- `MinIO`
-  替代 S3/GCS。
-- `Redis x5`
-  其中 4 个按单节点 cluster 模式跑，1 个 standalone 用于 pubsub。
-- `GCloud emulators`
-  提供 Firestore / PubSub / Bigtable 的本地替代。
-
-被 stub 或降级的模块：
-
-- `Contact Discovery Service`
-- `SVR2 / SVRB`
-- `Key Transparency`
-- `FCM / APNs`
-- `Stripe / Braintree`
-- `Google Play Billing / Apple App Store`
-- `FoundationDB runtime`
-
-详细模块表见 [docs/modules.md](./docs/modules.md)。
-
-## 一键启动
+## 快速开始
 
 第一次使用：
 
@@ -82,6 +84,18 @@ git clone <your-repo-url> signal-deploy-docs
 cd signal-deploy-docs
 cp .env.example .env
 ./scripts/dev-up.sh
+```
+
+如果你想连最小链路一起验证：
+
+```bash
+./scripts/dev-up.sh --smoke-test
+```
+
+如果你想把后端和桌面端一起拉起来：
+
+```bash
+./scripts/dev-up.sh --include-desktop
 ```
 
 成功后默认会得到：
@@ -119,6 +133,12 @@ cp .env.example .env
 ./scripts/desktop-up.sh
 ```
 
+或者一步拉起后端加桌面端：
+
+```bash
+./scripts/dev-up.sh --include-desktop
+```
+
 桌面端支持两种思路：
 
 - `Standalone Device`
@@ -142,7 +162,7 @@ cp .env.example .env
 - `versions/current.env`
 - `patches/`
 - `deploy/config/`
-- 文档里的兼容性说明
+- 中英文文档里的兼容性说明
 
 详细策略见 [docs/versioning.md](./docs/versioning.md)。
 
@@ -152,6 +172,17 @@ cp .env.example .env
 - SGX 相关服务没有本地等价物，只能 stub。
 - FCM/APNs、支付、应用商店验证都是本地假实现或空实现。
 - `Signal-Desktop` 本地直连可用于调试，但真正扫码链接仍需要本地版移动端主设备。
+
+## 开源维护约定
+
+- 文档建议同时维护中文和英文版本。
+- `docs/plans/` 只保留本地计划文档，不纳入仓库版本控制。
+- `patches/` 只保留最小必需改动，不要把大规模本地实验直接塞进补丁。
+- 版本升级前后都建议跑：
+  - `./scripts/dev-up.sh --smoke-test`
+  - `./scripts/desktop-up.sh`
+
+更具体的协作规则见 [CONTRIBUTING.md](./CONTRIBUTING.md) 和 [docs/maintenance.md](./docs/maintenance.md)。
 
 ## License / Notice
 

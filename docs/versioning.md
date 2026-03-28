@@ -1,5 +1,7 @@
 # 版本与分支策略
 
+English: [./en/versioning.md](./en/versioning.md)
+
 ## 目标
 
 让部署文档仓库和 Signal 上游版本建立明确映射，避免“文档是一版、脚本是一版、真正能跑的是另一版”。
@@ -39,6 +41,7 @@
    - `deploy/config/signal-server.yml.tmpl`
    - 文档中的兼容性说明
 6. 验证通过后，把该分支作为该版本的发布分支推送到 GitHub
+7. 同步更新中英文文档
 
 ## 为什么以 `Signal-Server` 为主版本
 
@@ -51,3 +54,4 @@
 - `dynamic-config` 和 `asn` 初始化对象是否仍可被消费
 - `Signal-Desktop` 是否还能走 standalone
 - 本地补丁是否仍然最小且明确
+- 中英文文档是否仍与实际脚本一致

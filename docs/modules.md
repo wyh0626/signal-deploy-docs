@@ -1,5 +1,7 @@
 # 模块说明
 
+English: [./en/modules.md](./en/modules.md)
+
 ## 核心应用模块
 
 | 模块 | 来源 | 作用 | 本项目状态 |
@@ -50,3 +52,5 @@
   `@indutny/mac-screen-share` 缺失时提供 graceful fallback。
 - `scripts/start-local-dev.sh`
   从本仓库生成的本地配置注入 `NODE_CONFIG`，指向本地 `signal-server`。
+
+更完整的补丁说明见 [patches.md](./patches.md)。
