@@ -8,6 +8,8 @@
   Inventory of repo modules and infrastructure.
 - [dev-replacements.md](./dev-replacements.md)
   Local replacements and what can actually be tested.
+- [deployment-checklists.md](./deployment-checklists.md)
+  Two deployment tracks: production prep and low-cost testing.
 - [non-local-services.md](./non-local-services.md)
   Official dependencies that are not fully reproduced locally, and what they do.
 - [sgx.md](./sgx.md)

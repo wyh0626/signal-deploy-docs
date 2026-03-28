@@ -31,6 +31,8 @@ English: [README.en.md](./README.en.md)
   看清楚整个仓库到底包含哪些模块。
 - [docs/dev-replacements.md](./docs/dev-replacements.md)
   看清楚哪些官方依赖被本地替代了。
+- [docs/deployment-checklists.md](./docs/deployment-checklists.md)
+  看清楚“省钱测试”和“生产准备”应该分别买什么、部署什么。
 - [docs/non-local-services.md](./docs/non-local-services.md)
   看清楚哪些能力本地就是跑不全，以及这些模块分别负责什么。
 - [docs/patches.md](./docs/patches.md)

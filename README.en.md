@@ -29,6 +29,7 @@ Suggested reading order:
 
 - [docs/en/modules.md](./docs/en/modules.md)
 - [docs/en/dev-replacements.md](./docs/en/dev-replacements.md)
+- [docs/en/deployment-checklists.md](./docs/en/deployment-checklists.md)
 - [docs/en/non-local-services.md](./docs/en/non-local-services.md)
 - [docs/en/patches.md](./docs/en/patches.md)
 - [docs/en/sgx.md](./docs/en/sgx.md)
